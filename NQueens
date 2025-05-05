@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 20  // Max board size
+
+int board[MAX];  // board[i] represents the column where queen is placed in row i
+int N;           // Number of queens (size of board)
+
+int isSafe(int row, int col) {
+    for (int i = 0; i < row; i++) {
+        // Check column and diagonal conflicts
+        if (board[i] == col || abs(board[i] - col) == abs(i - row))
+            return 0;
+    }
+    return 1;
+}
+
+void printSolution() {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (board[i] == j)
+                printf("Q ");
+            else
+                printf(". ");
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+int solveNQueens(int row) {
+    if (row == N) {
+        printSolution();  // Found one solution
+        return 1;         // Return 1 to indicate success (can be changed for all solutions)
+    }
+
+    int res = 0;
+    for (int col = 0; col < N; col++) {
+        if (isSafe(row, col)) {
+            board[row] = col;       // Place queen
+            res += solveNQueens(row + 1); // Try placing next queen
+        }
+    }
+    return res;
+}
+
+int main() {
+    printf("Enter the value of N (1-%d): ", MAX);
+    scanf("%d", &N);
+
+    if (N < 1 || N > MAX) {
+        printf("Invalid value for N\n");
+        return 1;
+    }
+
+    int solutions = solveNQueens(0);
+    if (solutions == 0) {
+        printf("No solutions found.\n");
+    } else {
+        printf("Total solutions: %d\n", solutions);
+    }
+
+    return 0;
+}
