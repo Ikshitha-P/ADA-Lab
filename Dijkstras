@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <limits.h>
+
+#define MAX_VERTICES 100
+#define INF INT_MAX
+
+int graph[MAX_VERTICES][MAX_VERTICES];
+int dist[MAX_VERTICES];
+int prev[MAX_VERTICES];
+int visited[MAX_VERTICES];
+
+void dijkstra(int vertices, int source) {
+    for (int i = 0; i < vertices; i++) {
+        dist[i] = INF;
+        prev[i] = -1;
+        visited[i] = 0;
+    }
+    
+    dist[source] = 0;
+
+    for (int count = 0; count < vertices - 1; count++) {
+        int minDist = INF, u;
+        
+        for (int v = 0; v < vertices; v++) {
+            if (!visited[v] && dist[v] <= minDist) {
+                minDist = dist[v];
+                u = v;
+            }
+        }
+
+        visited[u] = 1;
+
+        for (int v = 0; v < vertices; v++) {
+            if (!visited[v] && graph[u][v] != 0 && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+                prev[v] = u;
+            }
+        }
+    }
+}
+
+void printShortestPath(int source, int destination) {
+    if (source == destination) {
+        printf("%d ", source);
+        return;
+    }
+    
+    if (prev[destination] == -1) {
+        printf("No path from %d to %d\n", source, destination);
+        return;
+    }
+    
+    printShortestPath(source, prev[destination]);
+    printf("%d ", destination);
+}
+
+int main() {
+    int vertices, edges;
+    
+    printf("Enter the number of vertices: ");
+    scanf("%d", &vertices);
+
+    printf("Enter the number of edges: ");
+    scanf("%d", &edges);
+
+    for (int i = 0; i < edges; i++) {
+        int u, v, weight;
+        printf("Enter edge (u v weight): ");
+        scanf("%d %d %d", &u, &v, &weight);
+        graph[u][v] = weight;
+        graph[v][u] = weight; // For undirected graph
+    }
+
+    int source;
+    printf("Enter the source vertex: ");
+    scanf("%d", &source);
+
+    dijkstra(vertices, source);
+
+    for (int i = 0; i < vertices; i++) {
+        if (i != source) {
+            printf("Shortest path from %d to %d: ", source, i);
+            printShortestPath(source, i);
+            printf("\n");
+        }
+    }
+
+    return 0;
+}
