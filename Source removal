@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_VERTICES 100
+
+int graph[MAX_VERTICES][MAX_VERTICES];
+int inDegree[MAX_VERTICES];
+int n; // Number of vertices
+
+void topoSortUsingSourceRemoval() {
+    int count = 0;
+    int topOrder[MAX_VERTICES];
+    
+    // Initialize in-degree for all vertices
+    for (int i = 0; i < n; i++) {
+        inDegree[i] = 0;
+    }
+    
+    // Compute in-degree of each vertex
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (graph[i][j] != 0) {
+                inDegree[j]++;
+            }
+        }
+    }
+    
+    // Perform source removal
+    while (count < n) {
+        int foundSource = 0;
+        
+        // Find a vertex with in-degree 0 (source vertex)
+        for (int i = 0; i < n; i++) {
+            if (inDegree[i] == 0) {
+                topOrder[count++] = i;  // Add it to the topological order
+                inDegree[i] = -1;       // Mark it as visited
+                
+                // Remove the vertex and update the in-degrees of its neighbors
+                for (int j = 0; j < n; j++) {
+                    if (graph[i][j] != 0) {
+                        inDegree[j]--;
+                    }
+                }
+                foundSource = 1;
+                break;
+            }
+        }
+        
+        if (!foundSource) {
+            printf("The graph contains a cycle. Topological sort is not possible.\n");
+            return;
+        }
+    }
+    
+    // Print the topological order
+    printf("Topological Order: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", topOrder[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    printf("Enter the number of vertices: ");
+    scanf("%d", &n);
+    
+    printf("Enter the adjacency matrix (enter 0 if no edge exists between vertices):\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+    
+    topoSortUsingSourceRemoval();
+    
+    return 0;
+}
