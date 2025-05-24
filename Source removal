@@ -1,77 +1,86 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-#define MAX_VERTICES 100
+#define MAX 100
 
-int graph[MAX_VERTICES][MAX_VERTICES];
-int inDegree[MAX_VERTICES];
-int n; // Number of vertices
+int adj[MAX][MAX];      // Adjacency matrix
+int indegree[MAX];      // Indegree of each vertex
+int queue[MAX];         // Queue for source removal
+int front = 0, rear = -1;
 
-void topoSortUsingSourceRemoval() {
-    int count = 0;
-    int topOrder[MAX_VERTICES];
-    
-    // Initialize in-degree for all vertices
+void enqueue(int v) {
+    queue[++rear] = v;
+}
+
+int dequeue() {
+    return queue[front++];
+}
+
+int isEmpty() {
+    return front > rear;
+}
+
+void topologicalSort(int n) {
+    // Step 1: Calculate indegree of all vertices
     for (int i = 0; i < n; i++) {
-        inDegree[i] = 0;
-    }
-    
-    // Compute in-degree of each vertex
-    for (int i = 0; i < n; i++) {
+        indegree[i] = 0;
         for (int j = 0; j < n; j++) {
-            if (graph[i][j] != 0) {
-                inDegree[j]++;
-            }
+            if (adj[j][i] == 1)
+                indegree[i]++;
         }
     }
-    
-    // Perform source removal
-    while (count < n) {
-        int foundSource = 0;
-        
-        // Find a vertex with in-degree 0 (source vertex)
-        for (int i = 0; i < n; i++) {
-            if (inDegree[i] == 0) {
-                topOrder[count++] = i;  // Add it to the topological order
-                inDegree[i] = -1;       // Mark it as visited
-                
-                // Remove the vertex and update the in-degrees of its neighbors
-                for (int j = 0; j < n; j++) {
-                    if (graph[i][j] != 0) {
-                        inDegree[j]--;
-                    }
-                }
-                foundSource = 1;
-                break;
-            }
-        }
-        
-        if (!foundSource) {
-            printf("The graph contains a cycle. Topological sort is not possible.\n");
-            return;
-        }
-    }
-    
-    // Print the topological order
-    printf("Topological Order: ");
+
+    // Step 2: Enqueue vertices with indegree 0
     for (int i = 0; i < n; i++) {
-        printf("%d ", topOrder[i]);
+        if (indegree[i] == 0)
+            enqueue(i);
     }
-    printf("\n");
+
+    printf("Topological Sort Order:\n");
+
+    // Step 3: Process queue
+    int count = 0;
+    while (!isEmpty()) {
+        int v = dequeue();
+        printf("%d ", v);
+        count++;
+
+        // Decrease indegree of neighbors
+        for (int i = 0; i < n; i++) {
+            if (adj[v][i] == 1) {
+                indegree[i]--;
+                if (indegree[i] == 0)
+                    enqueue(i);
+            }
+        }
+    }
+
+    // If count != n, there is a cycle
+    if (count != n)
+        printf("\nGraph has a cycle. Topological sorting not possible.\n");
+    else
+        printf("\n");
 }
 
 int main() {
-    printf("Enter the number of vertices: ");
+    int n, e;
+    printf("Enter number of vertices: ");
     scanf("%d", &n);
-    
-    printf("Enter the adjacency matrix (enter 0 if no edge exists between vertices):\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            scanf("%d", &graph[i][j]);
-        }
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
+
+    // Initialize adjacency matrix
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            adj[i][j] = 0;
+
+    printf("Enter edges (source destination):\n");
+    for (int i = 0; i < e; i++) {
+        int u, v;
+        scanf("%d%d", &u, &v);
+        adj[u][v] = 1;
     }
-    
-    topoSortUsingSourceRemoval();
-    
+
+    topologicalSort(n);
+
     return 0;
 }
